@@ -175,6 +175,12 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
             pref_wifi_homes.setEntryValues(listSSID.toArray(new CharSequence[0]));
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            TwoStatePreference pref_handover =
+                    (TwoStatePreference) screen.findPreference("handover");
+            cat_advanced.removePreference(pref_handover);
+        }
+
         Preference pref_reset_usage = screen.findPreference("reset_usage");
         pref_reset_usage.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -359,9 +365,14 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
                 public boolean onPreferenceClick(Preference preference) {
                     final File tmp = new File(getFilesDir(), "hosts.tmp");
                     final File hosts = new File(getFilesDir(), "hosts.txt");
+
                     EditTextPreference pref_hosts_url = (EditTextPreference) screen.findPreference("hosts_url");
+                    String hosts_url = pref_hosts_url.getText();
+                    if ("https://www.netguard.me/hosts".equals(hosts_url))
+                        hosts_url = BuildConfig.HOSTS_FILE_URI;
+
                     try {
-                        new DownloadTask(ActivitySettings.this, new URL(pref_hosts_url.getText()), tmp, new DownloadTask.Listener() {
+                        new DownloadTask(ActivitySettings.this, new URL(hosts_url), tmp, new DownloadTask.Listener() {
                             @Override
                             public void onCompleted() {
                                 if (hosts.exists())
