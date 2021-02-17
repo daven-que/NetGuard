@@ -355,8 +355,10 @@ public class Rule {
                     if (all ||
                             ((rule.system ? show_system : show_user) &&
                                     (show_nointernet || rule.internet) &&
+//DaveN+
                                     (show_disabled || rule.enabled)) ||
                         (!show_system && !show_user && ((show_disabled && !rule.enabled) || (show_nointernet && !rule.internet))) ) {
+//DaveN-
 
                         rule.wifi_default = (pre_wifi_blocked.containsKey(info.packageName) ? pre_wifi_blocked.get(info.packageName) : default_wifi);
                         rule.other_default = (pre_other_blocked.containsKey(info.packageName) ? pre_other_blocked.get(info.packageName) : default_other);
