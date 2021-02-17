@@ -340,8 +340,10 @@ public class Rule {
             for (PackageInfo info : listPI)
                 try {
                     // Skip self
-                    if (info.applicationInfo.uid == Process.myUid())
-                        continue;
+//DaveN+
+                    //if (info.applicationInfo.uid == Process.myUid())
+                    //    continue;
+//DaveN-
 
                     Rule rule = new Rule(dh, info, context);
 
