@@ -9,6 +9,7 @@
 /captures
 /tools/config.sh
 /app/.externalNativeBuild
+/app/.cxx
 /app/release
 /app/play
 keystore.properties
