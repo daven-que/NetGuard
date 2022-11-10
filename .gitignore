@@ -9,7 +9,9 @@
 /captures
 /tools/config.sh
 /app/.externalNativeBuild
+#DaveN+
 /app/.cxx
+#DaveN-
 /app/release
 /app/play
 keystore.properties

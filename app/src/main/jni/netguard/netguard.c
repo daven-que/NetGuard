@@ -996,7 +996,6 @@ struct alloc_record *alloc = NULL;
 pthread_mutex_t *alock = NULL;
 
 //DaveN+
-//void ng_add_alloc(void *ptr, const char *tag) {
 void ng_add_alloc(const void *ptr, const char *tag) {
 //DaveN-
 #ifdef PROFILE_MEMORY
@@ -1037,7 +1036,6 @@ void ng_add_alloc(const void *ptr, const char *tag) {
 }
 
 //DaveN+
-//void ng_delete_alloc(void *ptr, const char *file, int line) {
 void ng_delete_alloc(const void *ptr, const char *file, int line) {
 //DaveN-
 #ifdef PROFILE_MEMORY

@@ -557,12 +557,10 @@ int is_writable(int fd);
 long long get_ms();
 
 //DaveN+
-//void ng_add_alloc(void *ptr, const char *tag);
 void ng_add_alloc(const void *ptr, const char *tag);
 //Daven-
 
 //DaveN+
-//void ng_delete_alloc(void *ptr, const char *file, int line);
 void ng_delete_alloc(const void *ptr, const char *file, int line);
 //Daven-
 
