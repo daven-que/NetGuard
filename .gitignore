@@ -13,3 +13,4 @@
 /app/release
 /app/play
 keystore.properties
+crowdin.properties
