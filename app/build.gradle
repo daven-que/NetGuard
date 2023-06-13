@@ -79,7 +79,9 @@ android {
     lint {
         disable 'MissingTranslation'
     }
+//DaveN+
     namespace 'eu.faircode.netguard'
+//DaveN-
 }
 
 dependencies {
