@@ -62,6 +62,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private final static int MSG_ACCESS = 2;
     private final static int MSG_FORWARD = 3;
 
+    private final static long SYN_SNI_DELAY = 5000L;
+
     private SharedPreferences prefs;
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
@@ -369,6 +371,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = this.getWritableDatabase();
             db.beginTransactionNonExclusive();
             try {
+                if (packet.protocol == 6 /* TCP */ &&
+                        packet.daddr != null &&
+                        packet.dport > 0 &&
+                        packet.uid > 0 &&
+                        "sni".equals(packet.data)) {
+                    int deleted = db.delete("log", "time > ?" +
+                                    " AND protocol = ?" +
+                                    " AND version = ?" +
+                                    " AND flags = ?" +
+                                    " AND daddr = ?" +
+                                    " AND dport = ?" +
+                                    " AND uid = ?",
+                            new String[]{
+                                    Long.toString(packet.time - SYN_SNI_DELAY),
+                                    Integer.toString(packet.protocol),
+                                    Integer.toString(packet.version),
+                                    "S", // SYN
+                                    packet.daddr,
+                                    Integer.toString(packet.dport),
+                                    Integer.toString(packet.uid)
+                            });
+                    Log.i(TAG, "Deleted=" + deleted + " packet=" + packet + " dname=" + dname);
+                }
                 ContentValues cv = new ContentValues();
                 cv.put("time", packet.time);
                 cv.put("version", packet.version);

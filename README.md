@@ -105,6 +105,9 @@ or in a [Secure Folder](https://www.samsung.com/uk/support/mobile-devices/what-i
 or as second instance (MIUI), or as Parallel app (OnePlus), or as Xiaomi dual app
 because the Android VPN service too often does not work correctly in this situation, which can't be fixed by NetGuard.
 
+NetGuard is not supported for internet connections via a wire, like ethernet or USB,
+because the Android VPN service often doesn't work properly in this situation.
+
 Filtering mode cannot be used on [CopperheadOS](https://copperhead.co/android/).
 
 NetGuard will not work or crash when the package *com.android.vpndialogs* has been removed or otherwise is unavailable.
@@ -115,7 +118,7 @@ If you disable this package, you can enable it with this command again:
 adb shell pm enable --user 0 com.android.vpndialogs
 ```
 
-NetGuard is supported for phones and tablets only, so not for other device types like on a television or in a car.
+NetGuard is supported on phones and tablets with a true-color screen only, so not for other device types like on a television or in a car.
 
 Android does not allow incoming connections (not the same as incoming traffic) and the Android VPN service has no support for this either.
 Therefore managing incoming connections for servers running on your device is not supported.

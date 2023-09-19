@@ -3,18 +3,13 @@
 buildscript {
     repositories {
         google()
-//DaveN+
-//        jcenter()
-        mavenCentral()
-//DaveN-
+        jcenter()
     }
     dependencies {
         // http://tools.android.com/tech-docs/new-build-system/gradle-experimental
         // https://bintray.com/android/android-tools/com.android.tools.build.gradle-experimental/view
         // https://bintray.com/android/android-tools/com.google.gms.google-services/view
-//DaveN+
-        classpath 'com.android.tools.build:gradle:7.4.1'
-//DaveN-
+        classpath 'com.android.tools.build:gradle:8.1.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -22,15 +17,8 @@ buildscript {
 }
 
 allprojects {
-//DaveN+
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-    }
-//DaveN-
     repositories {
-//DaveN+
-//        jcenter()
-//DaveN-
+        jcenter()
         mavenCentral()
         maven {
             url 'https://maven.google.com'

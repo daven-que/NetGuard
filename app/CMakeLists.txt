@@ -1,8 +1,6 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-project(NetGuard)
-
 add_library( netguard
              SHARED
              src/main/jni/netguard/netguard.c
@@ -11,6 +9,7 @@ add_library( netguard
              src/main/jni/netguard/tcp.c
              src/main/jni/netguard/udp.c
              src/main/jni/netguard/icmp.c
+             src/main/jni/netguard/tls.c
              src/main/jni/netguard/dns.c
              src/main/jni/netguard/dhcp.c
              src/main/jni/netguard/pcap.c

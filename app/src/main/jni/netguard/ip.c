@@ -281,11 +281,29 @@ void handle_ip(const struct arguments *args,
         }
     }
 
+    // Get server name
+    char server_name[TLS_SNI_LENGTH + 1];
+    *server_name = 0;
+    if (protocol == IPPROTO_TCP) {
+        const struct tcphdr *tcphdr = (struct tcphdr *) payload;
+        const uint8_t tcpoptlen = (uint8_t) ((tcphdr->doff - 5) * 4);
+        const uint8_t *data = payload + sizeof(struct tcphdr) + tcpoptlen;
+        const uint16_t datalen = (const uint16_t) (length - (data - pkt));
+
+        if (get_sni(data, datalen, server_name)) {
+            log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
+            dns_resolved(args, server_name, server_name, dest, -1);
+        }
+    }
+
+    if (*server_name != 0)
+        strcpy(data, "sni");
+
     // Get uid
     jint uid = -1;
     if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6 ||
         (protocol == IPPROTO_UDP && !has_udp_session(args, pkt, payload)) ||
-        (protocol == IPPROTO_TCP && syn)) {
+        (protocol == IPPROTO_TCP && (syn || *server_name != 0))) {
         if (args->ctx->sdk <= 28) // Android 9 Pie
             uid = get_uid(version, protocol, saddr, sport, daddr, dport);
         else
@@ -293,15 +311,15 @@ void handle_ip(const struct arguments *args,
     }
 
     log_android(ANDROID_LOG_DEBUG,
-                "Packet v%d %s/%u > %s/%u proto %d flags %s uid %d",
-                version, source, sport, dest, dport, protocol, flags, uid);
+                "Packet v%d %s/%u > %s/%u proto %d flags %s uid %d sni %s",
+                version, source, sport, dest, dport, protocol, flags, uid, server_name);
 
     // Check if allowed
     int allowed = 0;
     struct allowed *redirect = NULL;
     if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload))
         allowed = 1; // could be a lingering/blocked session
-    else if (protocol == IPPROTO_TCP && (!syn || (uid == 0 && dport == 53)))
+    else if (protocol == IPPROTO_TCP && (!syn || (uid == 0 && dport == 53)) && *server_name == 0)
         allowed = 1; // assume existing session
     else {
         jobject objPacket = create_packet(
@@ -323,6 +341,8 @@ void handle_ip(const struct arguments *args,
     } else {
         if (protocol == IPPROTO_UDP)
             block_udp(args, pkt, length, payload, uid);
+        else if (protocol == IPPROTO_TCP && *server_name != 0 && !allowed)
+            handle_tcp(args, pkt, length, payload, uid, allowed, redirect, epoll_fd); // RST
 
         log_android(ANDROID_LOG_WARN, "Address v%d p%d %s/%u syn %d not allowed",
                     version, protocol, dest, dport, syn);
