@@ -53,6 +53,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.net.ConnectivityManagerCompat;
 import androidx.preference.PreferenceManager;
 
@@ -405,9 +406,7 @@ public class Util {
         else {
             PackageManager pm = context.getPackageManager();
             String[] pkgs = pm.getPackagesForUid(uid);
-            if (pkgs == null)
-                listResult.add(Integer.toString(uid));
-            else
+            if (pkgs != null)
                 for (String pkg : pkgs)
                     try {
                         ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
@@ -845,6 +844,14 @@ public class Util {
     public static boolean dataSaving(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return (cm.getRestrictBackgroundStatus() == ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED);
+    }
+
+    public static boolean canNotify(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
+            return true;
+        else
+            return (ActivityCompat.checkSelfPermission(context,
+                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED);
     }
 
     private static StringBuilder getTrafficLog(Context context) {
