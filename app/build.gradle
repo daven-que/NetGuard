@@ -85,6 +85,15 @@ android {
     }
 }
 
+//DaveN+
+allprojects {
+    tasks.withType(JavaCompile) {
+//        options.compilerArgs << "-Xlint:unchecked"
+//        options.compilerArgs << "-Xlint:deprecation"
+    }
+}
+
+//DaveN-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
