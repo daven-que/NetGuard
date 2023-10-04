@@ -176,9 +176,6 @@ public class IAB implements ServiceConnection {
     }
 
     public static boolean isPurchased(String sku, Context context) {
-//DaveN+
-        if (true) return true;
-//DaveN-
         try {
             if (Util.isDebuggable(context)) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -200,9 +197,6 @@ public class IAB implements ServiceConnection {
     }
 
     public static boolean isPurchasedAny(Context context) {
-//DaveN+
-        if (true) return true;
-//DaveN-
         try {
             if (Util.isDebuggable(context)) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
