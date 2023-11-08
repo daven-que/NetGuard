@@ -20,6 +20,12 @@ buildscript {
 }
 
 allprojects {
+// DaveN+
+    tasks.withType(JavaCompile) {
+//        options.compilerArgs << "-Xlint:unchecked"
+//        options.compilerArgs << "-Xlint:deprecation"
+    }
+// DaveN-
     repositories {
 // DaveN+
 //        jcenter()
