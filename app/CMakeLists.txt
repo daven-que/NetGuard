@@ -1,6 +1,10 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+#DaveN+
+project(NetGuard)
+
+#DaveN-
 add_library( netguard
              SHARED
              src/main/jni/netguard/netguard.c
