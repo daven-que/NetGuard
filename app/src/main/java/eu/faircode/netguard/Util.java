@@ -38,6 +38,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -164,16 +165,6 @@ public class Util {
         NetworkInfo ni = cm.getActiveNetworkInfo();
         if (ni != null && ni.isConnected())
             return true;
-
-        Network[] networks = cm.getAllNetworks();
-        if (networks == null)
-            return false;
-
-        for (Network network : networks) {
-            ni = cm.getNetworkInfo(network);
-            if (ni != null && ni.getType() != ConnectivityManager.TYPE_VPN && ni.isConnected())
-                return true;
-        }
 
         return false;
     }
@@ -410,7 +401,9 @@ public class Util {
                 for (String pkg : pkgs)
                     try {
                         ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
-                        listResult.add(pm.getApplicationLabel(info).toString());
+                        String name = pm.getApplicationLabel(info).toString();
+                        if (!TextUtils.isEmpty(name))
+                            listResult.add(name);
                     } catch (PackageManager.NameNotFoundException ignored) {
                     }
             Collections.sort(listResult);

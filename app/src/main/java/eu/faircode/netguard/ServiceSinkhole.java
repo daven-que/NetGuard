@@ -104,7 +104,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -1095,7 +1094,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 remoteViews.setTextViewText(R.id.tvMax, getString(R.string.msg_mbsec, max / 2 / 1000 / 1000));
 
             // Show session/file count
-            if (filter && loglevel <= Log.WARN) {
+            if (filter && loglevel > Log.WARN) {
                 int[] count = jni_get_stats(jni_context);
                 remoteViews.setTextViewText(R.id.tvSessions, count[0] + "/" + count[1] + "/" + count[2]);
                 remoteViews.setTextViewText(R.id.tvFiles, count[3] + "/" + count[4]);
@@ -2392,11 +2391,16 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     public void notifyNewApplication(int uid, boolean malware) {
         if (uid < 0)
             return;
+        if (uid == Process.myUid())
+            return;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         try {
             // Get application name
-            String name = TextUtils.join(", ", Util.getApplicationNames(uid, this));
+            List<String> names = Util.getApplicationNames(uid, this);
+            if (names.size() == 0)
+                return;
+            String name = TextUtils.join(", ", names);
 
             // Get application info
             PackageManager pm = getPackageManager();
@@ -2600,9 +2604,8 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
 
         ConnectivityManager.NetworkCallback nc = new ConnectivityManager.NetworkCallback() {
-            private Network last_active = null;
             private Boolean last_connected = null;
-            private Boolean last_unmetered = null;
+            private Boolean last_metered = null;
             private String last_generation = null;
             private List<InetAddress> last_dns = null;
 
@@ -2610,6 +2613,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             public void onAvailable(Network network) {
                 Log.i(TAG, "Available network=" + network);
                 last_connected = Util.isConnected(ServiceSinkhole.this);
+                last_metered = Util.isMeteredNetwork(ServiceSinkhole.this);
                 reload("network available", ServiceSinkhole.this, false);
             }
 
@@ -2635,42 +2639,34 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
             public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
                 Log.i(TAG, "Changed capabilities=" + network + " caps=" + networkCapabilities);
 
-                Network active = (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ? null : cm.getActiveNetwork());
                 boolean connected = Util.isConnected(ServiceSinkhole.this);
-                boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+                boolean metered = Util.isMeteredNetwork(ServiceSinkhole.this);
                 String generation = Util.getNetworkGeneration(ServiceSinkhole.this);
-                Log.i(TAG, "Active=" + network +
-                        " connected=" + connected + "/" + last_connected +
-                        " unmetered=" + unmetered + "/" + last_unmetered +
+                Log.i(TAG, "Connected=" + connected + "/" + last_connected +
+                        " unmetered=" + metered + "/" + last_metered +
                         " generation=" + generation + "/" + last_generation);
 
-                boolean reloading = false;
-                if (!Objects.equals(active, last_active)) {
-                    reloading = true;
-                    reload("Active network changed", ServiceSinkhole.this, false);
-                }
+                String reason = null;
 
-                if (last_connected != null && !last_connected.equals(connected) && !reloading) {
-                    reloading = true;
-                    reload("Connected state changed", ServiceSinkhole.this, false);
-                }
+                if (reason == null && last_connected != null && !last_connected.equals(connected))
+                    reason = "Connected state changed";
 
-                if (last_unmetered != null && !last_unmetered.equals(unmetered) && !reloading) {
-                    reloading = true;
-                    reload("Unmetered state changed", ServiceSinkhole.this, false);
-                }
+                if (reason == null && last_metered != null && !last_metered.equals(metered))
+                    reason = "Unmetered state changed";
 
-                if (last_generation != null && !last_generation.equals(generation) && !reloading) {
+                if (reason == null && last_generation != null && !last_generation.equals(generation)) {
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ServiceSinkhole.this);
                     if (prefs.getBoolean("unmetered_2g", false) ||
                             prefs.getBoolean("unmetered_3g", false) ||
                             prefs.getBoolean("unmetered_4g", false))
-                        reload("Generation changed", ServiceSinkhole.this, false);
+                        reason = "Generation changed";
                 }
 
-                last_active = active;
+                if (reason != null)
+                    reload(reason, ServiceSinkhole.this, false);
+
                 last_connected = connected;
-                last_unmetered = unmetered;
+                last_metered = metered;
                 last_generation = generation;
             }
 
