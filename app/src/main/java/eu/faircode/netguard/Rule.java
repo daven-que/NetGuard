@@ -201,10 +201,6 @@ public class Rule {
     }
 
     public static List<Rule> getRules(final boolean all, Context context) {
-        return getRules(all, false, context);
-    }
-
-    public static List<Rule> getRules(final boolean all, boolean self, Context context) {
         synchronized (context.getApplicationContext()) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences wifi = context.getSharedPreferences("wifi", Context.MODE_PRIVATE);
